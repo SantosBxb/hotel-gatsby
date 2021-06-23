@@ -1,0 +1,91 @@
+para poder usar tailwindcss se deb agregar como plugin a gatsby.config.js
+para usar tailwindcss se debe importar en gatsby.browser.js
+
+para hacer consultas a grapql se debe importar desde gatsby
+  import {graphql, useStaticQuery} from 'gatsby'
+
+Helmet -> metadata
+
+en la interfaz de graphiql se solicitan a travez de querys
+ejemplo:
+  query {
+    image: file(relativePath: {eq: "8.jpg"}){
+      sharp: childImageSharp{
+        fluid { srcSet}
+      }
+    }
+  }
+sharp es una libreria que incluye gatsby para optimizar imagenes 
+  
+para obtener la imagen 
+const {image } = useStaticQuery(graphql`
+  query {
+    image: file(relativePath: {eq: "8.jpg"}){
+      sharp: childImageSharp{
+        fluid { 
+          srcSetWebp -> primeor descarga la imagen 
+          ...GatsbyImageSharpFluid_withWebp -> descarga una previw de la imagen 
+          }
+        
+      }
+    }
+  }
+  `)
+para mostar laimagen se usa la libreria gatsby-background-image
+import BackgroundImage from 'gatsby-background-image'
+es un componente que se le puden pasar diferentes props
+fadeIn -> se encarga del efecto al cargar la imagen 
+<BackgroundImage 
+  tag="section" fluid={image.sharp.fluid} fadeIn='soft'>
+
+</BackgroundImage> 
+
+se usara datocms 
+se deb instalar el plugin de gatsby-source-datocms
+para agregarlo se debe configurar
+    {
+      resolve: 'gatsby-source-datocms',
+      options: {
+        apiToken: '5c2347fb81d4ecd124a397e746e4ad'
+      }
+    }
+
+para obtener imagenes se usa 
+import {GatsbyImage} from 'gatsby-plugin-image'
+ image {
+   gatsbyImageData
+ }
+<GatsbyImage image={imagen.gatsbyImagedata} alt="Inicio"/>
+
+para poder crear paginas desde el cms se deb configurar gatsby.node
+exports.createPages = async ({actions, graphql, reporter}) => {
+  //se hace la consulta 
+  const resultado = await graphql(`
+    query {
+      allDatoCmsHabitacion {
+        nodes {
+          slug
+        }
+      }
+    }
+  `)
+  //si hay error, informar 
+  if(resultado.error) {
+    reporter.panic("No huno resultados", resultado.errors);
+  }
+
+  // si hay paginas crear los archivos 
+  const habitaciones = resultado.data.allDatoCmsHabitacion.nodes;
+  //por cada habitacion se creara una page 
+  habitaciones.forEach( habitacion => {
+    actions.createPage({
+      path:habitacion.slug,
+      component:require.resolve('./src/components/habitaciones.js'),
+      context:{
+        slug: habitacion.slug
+      }
+    })
+  })
+}
+lo que hace gatsby.node es crear una variable para poder consumirla desde el componente
+

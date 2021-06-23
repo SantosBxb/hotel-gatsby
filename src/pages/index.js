@@ -1,29 +1,34 @@
 import * as React from "react"
-import { Link } from "gatsby"
-import { StaticImage } from "gatsby-plugin-image"
-
+import ContenidoInicio from "../components/contenidoInicio"
+import ImagenHotel from "../components/imagenHotel"
 import Layout from "../components/layout"
-import Seo from "../components/seo"
+import useHabitaciones from "../hooks/useHabitaciones"
+import tw, {css} from "twin.macro"
+import HabitacionPreview from "../components/habitacionPreview"
 
-const IndexPage = () => (
-  <Layout>
-    <Seo title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <StaticImage
-      src="../images/gatsby-astronaut.png"
-      width={300}
-      quality={95}
-      formats={["AUTO", "WEBP", "AVIF"]}
-      alt="A Gatsby astronaut"
-      style={{ marginBottom: `1.45rem` }}
-    />
-    <p>
-      <Link to="/page-2/">Go to page 2</Link> <br />
-      <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-    </p>
-  </Layout>
-)
+const Listado = tw.ul`
+  max-w-screen-xl w-11/12 mt-16 mx-auto md:(grid grid-cols-3 gap-12)
+`
+
+const IndexPage = () => {
+  const habitaciones = useHabitaciones()
+
+  return (
+    <Layout>
+    <ImagenHotel/>
+    <ContenidoInicio/>
+
+    <h2 css={css`${tw`text-center mt-20 text-5xl`}`}>Nuestras Habitaciones</h2>
+    <Listado>
+      {habitaciones.map(habitacion => (
+        <HabitacionPreview 
+          key={habitacion.id}
+          habitacion={habitacion}
+        />
+      ))}
+    </Listado>
+    </Layout>
+  )
+}
 
 export default IndexPage
